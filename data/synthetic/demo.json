@@ -1,0 +1,196 @@
+[
+  {
+    "epic_id": "EPIC-CHECKOUT-V2",
+    "project": "Payments Platform",
+    "epic_name": "Checkout v2",
+    "milestone": "Payments GA",
+    "milestone_date": "2026-03-15",
+    "claimed": { "progress_pct": 80, "staffing_fte": 3.0, "blockers_reported": 0 },
+    "observed": {
+      "commit_activity_percentile": 5,
+      "pr_merge_rate_per_week": 1,
+      "review_latency_hours_p50": 41.0,
+      "build_health": "amber",
+      "blocker_language_freq_per_100_msgs": 6.2,
+      "attention_share": 0.34
+    },
+    "drift_index": 0.71,
+    "drift_trend_days": 9,
+    "flag": "high",
+    "evidence_span": "standup-2026-02-18: \"basically wrapping up, just polish left\"",
+    "forecast": { "official_date": "2026-03-15", "p_on_time": 0.31, "p80_date": "2026-04-02" }
+  },
+  {
+    "epic_id": "EPIC-REFUNDS",
+    "project": "Payments Platform",
+    "epic_name": "Refund orchestration",
+    "milestone": "Payments GA",
+    "milestone_date": "2026-03-15",
+    "claimed": { "progress_pct": 45, "staffing_fte": 2.0, "blockers_reported": 1 },
+    "observed": {
+      "commit_activity_percentile": 48,
+      "pr_merge_rate_per_week": 5,
+      "review_latency_hours_p50": 11.0,
+      "build_health": "green",
+      "blocker_language_freq_per_100_msgs": 1.1,
+      "attention_share": 0.22
+    },
+    "drift_index": 0.12,
+    "drift_trend_days": 2,
+    "flag": "none",
+    "evidence_span": "sprint-board: 9 of 20 points complete, trajectory on trend",
+    "forecast": { "official_date": "2026-03-15", "p_on_time": 0.78, "p80_date": "2026-03-19" }
+  },
+  {
+    "epic_id": "EPIC-VENDOR-SANDBOX",
+    "project": "Payments Platform",
+    "epic_name": "Vendor sandbox integration",
+    "milestone": "Payments GA",
+    "milestone_date": "2026-03-15",
+    "claimed": { "progress_pct": 60, "staffing_fte": 1.0, "blockers_reported": 0 },
+    "observed": {
+      "commit_activity_percentile": 22,
+      "pr_merge_rate_per_week": 2,
+      "review_latency_hours_p50": 63.0,
+      "build_health": "red",
+      "blocker_language_freq_per_100_msgs": 4.8,
+      "attention_share": 0.09
+    },
+    "drift_index": 0.58,
+    "drift_trend_days": 6,
+    "flag": "medium",
+    "evidence_span": "channel #pay-integrations: \"sandbox still 500ing on us\" x4 this week",
+    "forecast": { "official_date": "2026-03-15", "p_on_time": 0.44, "p80_date": "2026-03-28" },
+    "linked_assumption": {
+      "text": "the vendor sandbox stays available through GA",
+      "owner": "integrations lead",
+      "validity_window_ends": "2026-03-15",
+      "invalidation_signal": "sandbox 5xx rate over 2% across a rolling 24h window",
+      "status": "at_risk"
+    }
+  },
+  {
+    "epic_id": "EPIC-API-SPEC",
+    "project": "Payments Platform",
+    "epic_name": "Public API spec",
+    "milestone": "Developer preview",
+    "milestone_date": "2026-02-28",
+    "claimed": { "progress_pct": 90, "staffing_fte": 1.5, "blockers_reported": 0 },
+    "observed": {
+      "commit_activity_percentile": 12,
+      "pr_merge_rate_per_week": 0,
+      "review_latency_hours_p50": 0.0,
+      "build_health": "green",
+      "blocker_language_freq_per_100_msgs": 0.4,
+      "attention_share": 0.05
+    },
+    "drift_index": 0.49,
+    "drift_trend_days": 11,
+    "flag": "medium",
+    "evidence_span": "no PR activity 11 days; claimed near-done",
+    "forecast": { "official_date": "2026-02-28", "p_on_time": 0.52, "p80_date": "2026-03-06" },
+    "linked_commitment": {
+      "quote": "I'll have the API spec by Friday",
+      "owner": "A. Rivera",
+      "artifact": "openapi.yaml",
+      "due_date": "2026-02-13",
+      "status": "silently_dropped",
+      "source": "sync-2026-02-06 transcript, 00:12:41"
+    }
+  },
+  {
+    "epic_id": "EPIC-ONBOARDING",
+    "project": "Growth",
+    "epic_name": "Self-serve onboarding",
+    "milestone": "Q1 activation push",
+    "milestone_date": "2026-03-31",
+    "claimed": { "progress_pct": 30, "staffing_fte": 2.5, "blockers_reported": 2 },
+    "observed": {
+      "commit_activity_percentile": 71,
+      "pr_merge_rate_per_week": 8,
+      "review_latency_hours_p50": 6.5,
+      "build_health": "green",
+      "blocker_language_freq_per_100_msgs": 2.0,
+      "attention_share": 0.41
+    },
+    "drift_index": 0.18,
+    "drift_trend_days": 1,
+    "flag": "none",
+    "evidence_span": "observed trajectory ahead of claimed progress; healthy",
+    "forecast": { "official_date": "2026-03-31", "p_on_time": 0.83, "p80_date": "2026-04-03" }
+  },
+  {
+    "epic_id": "EPIC-ANALYTICS",
+    "project": "Growth",
+    "epic_name": "Activation analytics",
+    "milestone": "Q1 activation push",
+    "milestone_date": "2026-03-31",
+    "claimed": { "progress_pct": 55, "staffing_fte": 1.0, "blockers_reported": 0 },
+    "observed": {
+      "commit_activity_percentile": 33,
+      "pr_merge_rate_per_week": 3,
+      "review_latency_hours_p50": 19.0,
+      "build_health": "amber",
+      "blocker_language_freq_per_100_msgs": 1.6,
+      "attention_share": 0.14
+    },
+    "drift_index": 0.29,
+    "drift_trend_days": 3,
+    "flag": "low",
+    "evidence_span": "single-person load concentration on one contributor",
+    "forecast": { "official_date": "2026-03-31", "p_on_time": 0.66, "p80_date": "2026-04-09" },
+    "linked_risk": {
+      "pattern": "single-person load concentration",
+      "signature": "one contributor owns over 70% of epic PRs for 3 straight weeks",
+      "tripwire_status": "armed"
+    }
+  },
+  {
+    "epic_id": "EPIC-MIGRATION",
+    "project": "Platform Infra",
+    "epic_name": "Postgres 16 migration",
+    "milestone": "Infra hardening",
+    "milestone_date": "2026-04-15",
+    "claimed": { "progress_pct": 70, "staffing_fte": 2.0, "blockers_reported": 1 },
+    "observed": {
+      "commit_activity_percentile": 58,
+      "pr_merge_rate_per_week": 4,
+      "review_latency_hours_p50": 14.0,
+      "build_health": "amber",
+      "blocker_language_freq_per_100_msgs": 3.3,
+      "attention_share": 0.27
+    },
+    "drift_index": 0.24,
+    "drift_trend_days": 2,
+    "flag": "low",
+    "evidence_span": "claimed vs observed roughly aligned; watch build health",
+    "forecast": { "official_date": "2026-04-15", "p_on_time": 0.7, "p80_date": "2026-04-22" }
+  },
+  {
+    "epic_id": "EPIC-SSO",
+    "project": "Platform Infra",
+    "epic_name": "Enterprise SSO",
+    "milestone": "Infra hardening",
+    "milestone_date": "2026-04-15",
+    "claimed": { "progress_pct": 20, "staffing_fte": 1.0, "blockers_reported": 3 },
+    "observed": {
+      "commit_activity_percentile": 8,
+      "pr_merge_rate_per_week": 0,
+      "review_latency_hours_p50": 0.0,
+      "build_health": "red",
+      "blocker_language_freq_per_100_msgs": 7.9,
+      "attention_share": 0.06
+    },
+    "drift_index": 0.64,
+    "drift_trend_days": 14,
+    "flag": "high",
+    "evidence_span": "integration risk parked at end of plan; cross-team PR latency climbing",
+    "forecast": { "official_date": "2026-04-15", "p_on_time": 0.19, "p80_date": "2026-05-06" },
+    "linked_decision": {
+      "text": "choose SAML vs OIDC-first for enterprise SSO",
+      "age_days": 21,
+      "blocks_critical_path": true,
+      "status": "escalated"
+    }
+  }
+]
