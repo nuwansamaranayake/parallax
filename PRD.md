@@ -47,3 +47,14 @@ Derived from the chapter's evaluation plan and enforced by the Phase-1 eval harn
 - **Tripwire lead time:** compiled tripwires fire ahead of the risks they monitor materializing.
 - **Reproducibility:** every headline number in the README is reproducible by a reviewer via the
   public-data replay suite.
+
+## Novelty (scoped)
+
+As of July 2026, we surveyed the open-source project-management and delivery-tracking landscape:
+ticket systems, sprint boards, and the AI add-ons that summarize meetings, draft status updates, and
+generate subtasks. None of the tools we reviewed makes its core objects the measured gap between
+claimed and observed project state, a calibrated probabilistic date forecast built on the team's own
+estimate-versus-actual history, and standing ledgers for the promises and assumptions that never
+became tickets. That combination, with risks compiled into deterministic tripwires and all signal
+collection visible to the measured team, is the bet Parallax makes. This is a scoped claim about the
+field we surveyed as of July 2026, not a claim of universal firstness.

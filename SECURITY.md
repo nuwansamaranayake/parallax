@@ -34,3 +34,9 @@ reads `OPENROUTER_API_KEY` from the environment. Secrets live in `.env` (gitigno
 ships with blank keys. The zero-key synthetic demo means a reviewer never needs a real credential to
 see the app respond. Every LLM call is logged as a trace (model, version, prompt hash, latency, cost,
 claims produced) — never the raw secret.
+
+## Reporting a vulnerability
+
+Report suspected vulnerabilities privately to **nuwans@hotmail.com**. Do not open a public issue.
+You will receive an acknowledgment within 72 hours. Please allow time to investigate and ship a fix
+before any public disclosure; a coordinated disclosure timeline will be agreed with you.
