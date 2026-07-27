@@ -75,3 +75,36 @@ the *diagnosed* root cause separately (Standard 5).
 - **Doctrine link**: the portfolio thesis (canonicalize before you compare — same lesson as
   CareerCompiler FAIL-0003, this time for numbers instead of names) and Standard 4's spirit:
   what the database returns must be asserted, not assumed.
+
+## FAIL-0005 — Adversarial review wave caught ten confirmed defects before release
+
+- **Date**: 2026-07-27
+- **Surface**: whole repo — engine, routes, schema, scripts, CI, Dockerfile, contracts.md.
+  Caught by an adversarial code review (every finding verified by live repro against this
+  code) before any release shipped.
+- **Findings**: 10 confirmed (4 major, 6 minor). The worst:
+  - The groundedness scanner's bare `\d+` counted digits inside workstream/project names
+    as numeric tokens — a workstream named "v2-api" produced false ungrounded tokens that
+    rejected every true narration sentence naming it, and would have false-failed the
+    eval's groundedness bound. The golden fixtures happened to be digit-free, so nothing
+    covered it (major).
+  - No `.dockerignore` existed, so `COPY . .` baked the gitignored `.env` — holding a
+    real OPENROUTER_API_KEY — plus `.git` into every image built by the documented
+    compose flow (major).
+  - The narration route ran the LLM network call inside an open DB transaction with no
+    client timeout configured (OpenAI default 600s): ~15 slow narrations would exhaust
+    the connection pool for every endpoint (major).
+  - Imports were append-only with no unique constraints: re-importing a tracker export
+    after todo->done double-counted claims at half weight, and a re-posted commit payload
+    silently doubled commit counts and churn through every downstream number (major).
+- **Fixes**: boundary-guarded numeric scan + `digit-names` eval case; `.dockerignore`;
+  read-txn -> LLM call -> write-txn split with `LLM_TIMEOUT_SECONDS` bound; unique
+  indexes + upserts (alembic 0003) for idempotent imports and single-row drift state;
+  loud failures for undeclared workstreams, unset `EXPECTED_TABLE_COUNT`, and the unset
+  narration model slot; CI groundwork pin corrected and fallbacks removed; contracts.md
+  claim backed by a real CI check (`scripts/check_contracts.py`).
+- **Doctrine link**: Standard 3 (fail loud, never silently skip or skew), Standard 4
+  (assert what the database holds), Standard 6 (contracts.md must match the live spec),
+  and the GoviHub lesson — every silent-failure path found here is the class this repo
+  exists to instrument against. An adversarial review of the "finished" tree found what
+  the green gate could not; the gate now tests for each of these regressions.

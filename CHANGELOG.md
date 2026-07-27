@@ -50,6 +50,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1) and a SECURITY.md vulnerability-reporting policy.
 
+### Fixed — adversarial review wave (10 confirmed findings, see FAILURES.md FAIL-0005)
+- Groundedness scanner counts only free-standing numbers: digits inside workstream or
+  project names ("v2-api", "ui5") no longer register as ungrounded tokens that reject true
+  narration sentences; new `digit-names` golden eval case pins it.
+- Imports are idempotent: unique indexes on `claimed_items (workstream_id, item_key)` and
+  `observed_commits (project_id, sha)` (alembic 0003, with dedupe for pre-existing rows)
+  and `ON CONFLICT DO UPDATE` upserts, so re-delivered tracker exports and commit payloads
+  converge instead of double-counting claims and churn.
+- Drift state is single-row-per-workstream under concurrency: unique indexes on
+  `drift_indices.workstream_id` and `activity_rollups.workstream_id` plus upserts in
+  `drift/compute`.
+- LLM narration call moved outside the DB transaction (read session, gateway call with no
+  connection held, then a write transaction) and bounded by `LLM_TIMEOUT_SECONDS`
+  (default 60s; previously the OpenAI-client default of 600s could pin pooled
+  connections).
+- `compute_drift` fails loudly on commits or items naming undeclared workstreams
+  (matching the API's 422 at import) instead of silently skewing `max_*` or dropping
+  items on the CLI/eval path.
+- `scripts/check_migrations.py` refuses to run as a silent no-op: an unset
+  `EXPECTED_TABLE_COUNT` now fails with a typed message instead of printing MIGRATION OK
+  for a check that never happened.
+- Narration with a missing model slot returns the typed 503 naming
+  `LLM_MODEL_EXTRACTION` (the error previously escaped as a 500 blaming
+  `LLM_MODEL_REASONING`).
+- `.dockerignore` added: `COPY . .` no longer bakes `.env` (live keys) or `.git` into
+  images built by the documented compose flow.
+- CI test job installs groundwork from the same pin as pyproject
+  (`nuwansamaranayake/groundwork@v0.1.0`, was the wrong owner) and the error-masking
+  `||` fallbacks are gone.
+- contracts.md claim is now backed by CI: the smoke job runs
+  `scripts/check_contracts.py`, asserting every `implemented` row exists in the live
+  `/openapi.json` spec.
+
 ## [0.1.0] - 2026-07-21
 ### Added
 - Engineering harness scaffold: governed doc set, config guard, verification gates,
