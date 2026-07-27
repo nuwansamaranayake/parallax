@@ -1,0 +1,89 @@
+{
+  "comment": "Synthetic project histories with planted drift. Each case declares which workstream is the planted drifter (claims high progress with near-zero observed activity) and which is the healthy control (claims match activity). The eval bounds in EVAL.md were written before the harness that consumes this file.",
+  "cases": [
+    {
+      "case_id": "planted-drift",
+      "project": "atlas",
+      "workstreams": {
+        "checkout": ["src/checkout/"],
+        "search": ["src/search/"],
+        "billing": ["src/billing/"]
+      },
+      "planted_drifting": "checkout",
+      "healthy_control": "search",
+      "claimed": [
+        {"item_key": "CHK-1", "workstream": "checkout", "title": "Cart service rewrite", "status": "done"},
+        {"item_key": "CHK-2", "workstream": "checkout", "title": "Payment intent flow", "status": "done"},
+        {"item_key": "CHK-3", "workstream": "checkout", "title": "Address validation", "status": "done"},
+        {"item_key": "CHK-4", "workstream": "checkout", "title": "Tax computation", "status": "in_progress", "claimed_progress": 0.2},
+        {"item_key": "SRC-1", "workstream": "search", "title": "Index rebuild pipeline", "status": "done"},
+        {"item_key": "SRC-2", "workstream": "search", "title": "Query parser v2", "status": "in_progress", "claimed_progress": 0.5},
+        {"item_key": "SRC-3", "workstream": "search", "title": "Ranking experiments", "status": "in_progress", "claimed_progress": 0.3},
+        {"item_key": "SRC-4", "workstream": "search", "title": "Synonym dictionary", "status": "todo"},
+        {"item_key": "BIL-1", "workstream": "billing", "title": "Invoice PDF export", "status": "todo"},
+        {"item_key": "BIL-2", "workstream": "billing", "title": "Dunning emails", "status": "in_progress", "claimed_progress": 0.25}
+      ],
+      "commits": [
+        {"sha": "aaaa0000001", "author": "maya", "committed_at": "2026-07-02T09:15:00+00:00", "message": "checkout: fix rounding on tax line", "files": ["src/checkout/tax.py"], "insertions": 4, "deletions": 2},
+        {"sha": "bbbb0000001", "author": "liam", "committed_at": "2026-07-01T09:00:00+00:00", "message": "search: index rebuild scaffolding", "files": ["src/search/index.py"], "insertions": 80, "deletions": 10},
+        {"sha": "bbbb0000002", "author": "liam", "committed_at": "2026-07-02T10:00:00+00:00", "message": "search: tokenizer", "files": ["src/search/tokenize.py"], "insertions": 60, "deletions": 5},
+        {"sha": "bbbb0000003", "author": "ana", "committed_at": "2026-07-03T11:00:00+00:00", "message": "search: query parser AST", "files": ["src/search/parser.py"], "insertions": 55, "deletions": 8},
+        {"sha": "bbbb0000004", "author": "liam", "committed_at": "2026-07-06T09:30:00+00:00", "message": "search: parser error recovery", "files": ["src/search/parser.py"], "insertions": 30, "deletions": 12},
+        {"sha": "bbbb0000005", "author": "ana", "committed_at": "2026-07-07T14:00:00+00:00", "message": "search: ranking harness", "files": ["src/search/rank.py"], "insertions": 48, "deletions": 2},
+        {"sha": "bbbb0000006", "author": "liam", "committed_at": "2026-07-08T09:00:00+00:00", "message": "search: BM25 baseline", "files": ["src/search/rank.py"], "insertions": 35, "deletions": 15},
+        {"sha": "bbbb0000007", "author": "ana", "committed_at": "2026-07-09T16:20:00+00:00", "message": "search: eval queries", "files": ["src/search/eval.py"], "insertions": 40, "deletions": 0},
+        {"sha": "bbbb0000008", "author": "liam", "committed_at": "2026-07-10T10:10:00+00:00", "message": "search: cache layer", "files": ["src/search/cache.py"], "insertions": 44, "deletions": 6},
+        {"sha": "bbbb0000009", "author": "ana", "committed_at": "2026-07-13T09:00:00+00:00", "message": "search: pagination", "files": ["src/search/api.py"], "insertions": 25, "deletions": 5},
+        {"sha": "bbbb0000010", "author": "liam", "committed_at": "2026-07-14T11:45:00+00:00", "message": "search: highlight snippets", "files": ["src/search/snippets.py"], "insertions": 38, "deletions": 2},
+        {"sha": "bbbb0000011", "author": "ana", "committed_at": "2026-07-15T15:00:00+00:00", "message": "search: parser fuzz fixes", "workstream": "search", "insertions": 30, "deletions": 20},
+        {"sha": "bbbb0000012", "author": "liam", "committed_at": "2026-07-16T09:40:00+00:00", "message": "search: synonym loader stub", "workstream": "search", "insertions": 20, "deletions": 10},
+        {"sha": "cccc0000001", "author": "noor", "committed_at": "2026-07-06T10:00:00+00:00", "message": "billing: invoice model", "files": ["src/billing/models.py"], "insertions": 45, "deletions": 5},
+        {"sha": "cccc0000002", "author": "noor", "committed_at": "2026-07-08T10:00:00+00:00", "message": "billing: dunning schedule", "files": ["src/billing/dunning.py"], "insertions": 30, "deletions": 10},
+        {"sha": "cccc0000003", "author": "noor", "committed_at": "2026-07-10T10:00:00+00:00", "message": "billing: schedule tests", "files": ["src/billing/test_dunning.py"], "insertions": 20, "deletions": 0},
+        {"sha": "cccc0000004", "author": "noor", "committed_at": "2026-07-14T10:00:00+00:00", "message": "billing: pdf spike", "files": ["src/billing/pdf.py"], "insertions": 8, "deletions": 2},
+        {"sha": "dddd0000001", "author": "maya", "committed_at": "2026-07-05T08:00:00+00:00", "message": "docs: update readme", "files": ["README.md"], "insertions": 12, "deletions": 3}
+      ]
+    },
+    {
+      "case_id": "sparse-history",
+      "project": "beacon",
+      "workstreams": {
+        "api": ["api/"],
+        "docs": ["docs/"]
+      },
+      "planted_drifting": "api",
+      "healthy_control": "docs",
+      "claimed": [
+        {"item_key": "API-1", "workstream": "api", "title": "Auth endpoints", "status": "done", "estimate_points": 3},
+        {"item_key": "API-2", "workstream": "api", "title": "Rate limiting", "status": "in_progress", "claimed_progress": 0.8, "estimate_points": 3},
+        {"item_key": "DOC-1", "workstream": "docs", "title": "Getting started guide", "status": "in_progress"},
+        {"item_key": "DOC-2", "workstream": "docs", "title": "API reference", "status": "todo"}
+      ],
+      "commits": [
+        {"sha": "eeee0000001", "author": "kai", "committed_at": "2026-07-09T09:00:00+00:00", "message": "docs: getting started skeleton", "files": ["docs/getting-started.md"], "insertions": 30, "deletions": 0},
+        {"sha": "eeee0000002", "author": "kai", "committed_at": "2026-07-12T09:00:00+00:00", "message": "docs: install section", "files": ["docs/getting-started.md"], "insertions": 8, "deletions": 2}
+      ]
+    },
+    {
+      "case_id": "zero-activity",
+      "project": "comet",
+      "workstreams": {
+        "core": ["core/"],
+        "infra": ["infra/"],
+        "legacy": ["legacy/"]
+      },
+      "planted_drifting": "core",
+      "healthy_control": "infra",
+      "claimed": [
+        {"item_key": "COR-1", "workstream": "core", "title": "Scheduler rework", "status": "in_progress", "claimed_progress": 0.9},
+        {"item_key": "COR-2", "workstream": "core", "title": "Event bus", "status": "done"},
+        {"item_key": "COR-3", "workstream": "core", "title": "Retry policy", "status": "in_progress", "claimed_progress": 0.5},
+        {"item_key": "INF-1", "workstream": "infra", "title": "Terraform baseline", "status": "todo"},
+        {"item_key": "INF-2", "workstream": "infra", "title": "Alerting rules", "status": "todo"},
+        {"item_key": "LEG-1", "workstream": "legacy", "title": "Decommission v1 cron", "status": "done"},
+        {"item_key": "LEG-2", "workstream": "legacy", "title": "Archive old tables", "status": "done"}
+      ],
+      "commits": []
+    }
+  ]
+}
