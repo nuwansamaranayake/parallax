@@ -93,6 +93,28 @@ def test_import_rejects_unknown_workstreams_and_malformed_rows(client):
     assert r.status_code == 422
 
 
+def test_reimport_is_idempotent_not_append_only(client):
+    """Re-delivered payloads upsert onto (workstream, item_key) / (project, sha): a
+    tracker export re-imported after todo->done must not half-weight claims, and a
+    re-posted commit payload must not double commit counts."""
+    pid = _seed(client)
+    items = [dict(i) for i in CASE["claimed"]]
+    for i in items:
+        i["status"] = "done"
+        i.pop("claimed_progress", None)
+    assert client.post(f"/api/v1/projects/{pid}/claimed/import",
+                       json={"items": items}).status_code == 201
+    assert client.post(f"/api/v1/projects/{pid}/observed/import",
+                       json={"commits": CASE["commits"]}).status_code == 201
+    client.post(f"/api/v1/projects/{pid}/drift/compute")
+    rows = client.get(f"/api/v1/projects/{pid}/drift").json()["rows"]
+    for row in rows:
+        assert row["status"] == "completed", row       # every claim is now done, once
+        assert row["claimed_fraction"] == 1.0, row
+    # one unattributed commit in the golden case; the rest exist exactly once
+    assert sum(r["commit_count"] for r in rows) == len(CASE["commits"]) - 1
+
+
 def test_narrate_without_key_fails_loud(client, monkeypatch):
     from app.config import settings
     monkeypatch.setattr(settings, "openrouter_api_key", "")
@@ -102,6 +124,26 @@ def test_narrate_without_key_fails_loud(client, monkeypatch):
     r = client.post(f"/api/v1/briefs/{bid}/narrate")
     assert r.status_code == 503
     assert "OPENROUTER_API_KEY" in r.json()["detail"]
+
+
+def test_narrate_without_model_fails_loud_naming_the_slot(client, monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "openrouter_api_key", "test-key")
+    monkeypatch.setattr(settings, "llm_model_extraction", "")
+    pid = _seed(client)
+    client.post(f"/api/v1/projects/{pid}/drift/compute")
+    bid = client.post(f"/api/v1/projects/{pid}/brief").json()["brief_id"]
+    r = client.post(f"/api/v1/briefs/{bid}/narrate")
+    assert r.status_code == 503
+    assert "LLM_MODEL_EXTRACTION" in r.json()["detail"]
+
+
+def test_gateway_client_carries_the_configured_timeout(monkeypatch):
+    from app import routes
+    from app.config import settings
+    monkeypatch.setattr(settings, "openrouter_api_key", "test-key")
+    gw = routes._gateway()
+    assert gw._client.timeout == settings.llm_timeout_seconds
 
 
 class _StubGateway:
@@ -135,6 +177,40 @@ def test_narrate_with_stub_gateway_gates_sentences(client, monkeypatch):
         "Checkout drifts furthest.", "Search logged 12 commits."]
     assert len(body["rejected"]) == 1 and "ungrounded" in body["rejected"][0]["reason"]
     assert body["narrative"] == "Checkout drifts furthest. Search logged 12 commits."
+
+
+def test_narrate_llm_call_runs_outside_db_transaction(client, monkeypatch):
+    """The gateway network call must never run inside an open DB transaction: a slow
+    provider would pin a pooled connection for the whole call."""
+    from app import routes
+    from app.config import settings
+    monkeypatch.setattr(settings, "openrouter_api_key", "test-key")
+    monkeypatch.setattr(settings, "llm_model_extraction", "stub/model")
+    monkeypatch.setattr(routes, "_gateway", lambda: _StubGateway())
+    pid = _seed(client)
+    client.post(f"/api/v1/projects/{pid}/drift/compute")
+    bid = client.post(f"/api/v1/projects/{pid}/brief").json()["brief_id"]
+
+    sessions = []
+    real_get_session = db.get_session
+
+    def tracking_get_session():
+        s = real_get_session()
+        sessions.append(s)
+        return s
+
+    monkeypatch.setattr(db, "get_session", tracking_get_session)
+    real_narrate = routes.narrate
+    seen = {}
+
+    def spy_narrate(gateway, model, markdown, stats):
+        seen["open_txns"] = [s for s in sessions if s.in_transaction()]
+        return real_narrate(gateway, model, markdown, stats)
+
+    monkeypatch.setattr(routes, "narrate", spy_narrate)
+    r = client.post(f"/api/v1/briefs/{bid}/narrate")
+    assert r.status_code == 201, r.text
+    assert seen["open_txns"] == [], "LLM call ran inside an open DB transaction"
 
 
 def test_bearer_auth_enforced_when_token_set(client, monkeypatch):

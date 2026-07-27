@@ -89,7 +89,8 @@ def narrate(
 ) -> Narration:
     """One gateway call, strict JSON schema, then the deterministic gate."""
     if not model:
-        raise RuntimeError("LLM_MODEL_REASONING is not set. Refusing to guess a model.")
+        raise RuntimeError(
+            "narration model is not set (LLM_MODEL_EXTRACTION). Refusing to guess a model.")
     stat_list = "\n".join(f"- {sid} = {fmt(s.value)} ({s.name})"
                           for sid, s in sorted(stats.items()))
     result = gateway.complete(

@@ -46,10 +46,15 @@ def _gateway() -> LLMGateway:
             detail="LLM narration requires OPENROUTER_API_KEY; the deterministic brief at "
                    "GET /api/v1/projects/{id}/brief is the keyless product",
         )
-    return LLMGateway(BaseConfig(
+    gw = LLMGateway(BaseConfig(
         openrouter_api_key=settings.openrouter_api_key,
         openrouter_base_url=settings.openrouter_base_url,
     ))
+    # groundwork's gateway does not yet expose a timeout knob and the OpenAI client
+    # default is 600s — long enough to pin a worker. Bound every call here from
+    # LLM_TIMEOUT_SECONDS (with_options returns a client copy with the timeout applied).
+    gw._client = gw._client.with_options(timeout=settings.llm_timeout_seconds)
+    return gw
 
 
 def _ws_map(s, project_id: int) -> dict[str, int]:
@@ -144,10 +149,11 @@ def import_claimed(pid: int, body: ClaimedImportIn,
             raise HTTPException(status_code=422,
                                 detail=f"unknown workstream keys: {unknown}")
         for i in items:
-            s.execute(db.claimed_items.insert().values(
+            s.execute(db.upsert(s.get_bind(), db.claimed_items, dict(
                 workstream_id=ws[i.workstream], item_key=i.item_key, title=i.title,
                 status=i.status.value, claimed_progress=i.claimed_progress,
-                estimate_points=i.estimate_points))
+                estimate_points=i.estimate_points),
+                ["workstream_id", "item_key"]))
     return {"imported": len(items)}
 
 
@@ -172,10 +178,11 @@ def import_observed(pid: int, body: ObservedImportIn,
             wid = ws.get(target)
             attributed += int(wid is not None)
             unattributed += int(wid is None)
-            s.execute(db.observed_commits.insert().values(
+            s.execute(db.upsert(s.get_bind(), db.observed_commits, dict(
                 project_id=pid, workstream_id=wid, sha=c.sha, author=c.author,
                 committed_at=c.committed_at, message=c.message, files=c.files,
-                insertions=c.insertions, deletions=c.deletions))
+                insertions=c.insertions, deletions=c.deletions),
+                ["project_id", "sha"]))
     return {"imported": len(commits), "attributed": attributed,
             "unattributed": unattributed}
 
@@ -199,20 +206,24 @@ def compute_project_drift(pid: int, authorization: str | None = Header(default=N
                   .where(db.drift_indices.c.workstream_id.in_(wids)))
         s.execute(db.activity_rollups.delete()
                   .where(db.activity_rollups.c.workstream_id.in_(wids)))
+        # Upserts (unique index per workstream): two concurrent computes converge on one
+        # row per workstream instead of double-inserting under READ COMMITTED.
         for key, rollup in rollups.items():
             if key == UNATTRIBUTED:
                 continue
-            s.execute(db.activity_rollups.insert().values(
+            s.execute(db.upsert(s.get_bind(), db.activity_rollups, dict(
                 workstream_id=ws[key], commit_count=rollup.commit_count,
                 churn=rollup.churn, author_count=rollup.author_count,
                 first_commit_at=rollup.first_commit_at,
-                last_commit_at=rollup.last_commit_at))
+                last_commit_at=rollup.last_commit_at),
+                ["workstream_id"]))
         for r in rows:
-            s.execute(db.drift_indices.insert().values(
+            s.execute(db.upsert(s.get_bind(), db.drift_indices, dict(
                 workstream_id=ws[r.workstream], claimed_fraction=r.claimed_fraction,
                 observed_fraction=r.observed_fraction, drift_index=r.drift_index,
                 status=r.status, item_count=r.item_count, commit_count=r.commit_count,
-                churn=r.churn))
+                churn=r.churn),
+                ["workstream_id"]))
     return {"computed": len(rows),
             "rows": [r.model_dump() for r in rows]}
 
@@ -313,13 +324,25 @@ def get_latest_brief(pid: int):
 def narrate_brief(bid: int, authorization: str | None = Header(default=None)):
     _auth(authorization)
     gateway = _gateway()
-    with db.get_session() as s, s.begin():
+    # Phase 1 pins narration to the extraction-model slot: the model with observed
+    # strict-schema enforcement (CareerCompiler FAIL-0003 — capability flags lie,
+    # observed behavior wins). Model ID comes from config, never hardcoded — and an
+    # unset slot refuses loudly with the same typed 503 pattern as a missing key.
+    if not settings.llm_model_extraction:
+        raise HTTPException(
+            status_code=503,
+            detail="LLM narration requires LLM_MODEL_EXTRACTION (narration model slot); "
+                   "the deterministic brief at GET /api/v1/projects/{id}/brief is the "
+                   "keyless product",
+        )
+    # Read transaction: load inputs, then release the connection. The LLM network call
+    # must never run inside an open DB transaction — a slow provider would pin pooled
+    # connections and starve every other endpoint.
+    with db.get_session() as s:
         brief, stats = _load_brief(s, bid)
-        # Phase 1 pins narration to the extraction-model slot: the model with observed
-        # strict-schema enforcement (CareerCompiler FAIL-0003 — capability flags lie,
-        # observed behavior wins). Model ID comes from config, never hardcoded.
-        result = narrate(gateway, settings.llm_model_extraction,
-                         brief["markdown"], stats)
+    result = narrate(gateway, settings.llm_model_extraction, brief["markdown"], stats)
+    # Write transaction: store the gated narrative.
+    with db.get_session() as s, s.begin():
         s.execute(db.briefs.update().where(db.briefs.c.id == bid)
                   .values(narrative=result.text))
     return {"brief_id": bid, "narrative": result.text,
