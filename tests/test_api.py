@@ -227,3 +227,18 @@ def test_duplicate_workstream_keys_rejected(client):
     ws = [{"key": "a", "paths": []}, {"key": "a", "paths": []}]
     r = client.post("/api/v1/projects", json={"name": "p", "workstreams": ws})
     assert r.status_code == 422
+
+
+def test_business_reads_require_bearer_when_token_set(client, monkeypatch):
+    """GET stored drift rows must not be world-readable in production.
+
+    Found by the production business-loop audit: this endpoint served real business
+    data to an unauthenticated caller over the public internet. Reads are now gated by
+    the same bearer check as writes; auth stays off only while the token is empty
+    (development semantics).
+    """
+    from app.config import settings
+    monkeypatch.setattr(settings, "smoke_test_token", "sekrit")
+    assert client.get("/api/v1/projects/1/drift").status_code == 401
+    assert client.get(
+        "/api/v1/projects/1/drift", headers={"Authorization": "Bearer sekrit"}).status_code != 401

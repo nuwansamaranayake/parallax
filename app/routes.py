@@ -243,7 +243,8 @@ def _stored_drift_rows(s, pid: int) -> list[DriftRow]:
 
 
 @router.get("/projects/{pid}/drift")
-def get_project_drift(pid: int):
+def get_project_drift(pid: int, authorization: str | None = Header(default=None)):
+    _auth(authorization)
     with db.get_session() as s:
         _require_project(s, pid)
         rows = _stored_drift_rows(s, pid)
@@ -254,7 +255,8 @@ def get_project_drift(pid: int):
 
 
 @router.get("/workstreams/{wid}/drift")
-def get_workstream_drift(wid: int):
+def get_workstream_drift(wid: int, authorization: str | None = Header(default=None)):
+    _auth(authorization)
     with db.get_session() as s:
         row = s.execute(sa.select(db.drift_indices)
                         .where(db.drift_indices.c.workstream_id == wid)).mappings().first()
@@ -307,7 +309,8 @@ def _load_brief(s, bid: int) -> tuple[dict, dict[str, Stat]]:
 
 
 @router.get("/projects/{pid}/brief")
-def get_latest_brief(pid: int):
+def get_latest_brief(pid: int, authorization: str | None = Header(default=None)):
+    _auth(authorization)
     with db.get_session() as s:
         _require_project(s, pid)
         row = s.execute(sa.select(db.briefs.c.id)
