@@ -1,0 +1,25 @@
+# Seismograph behavioral contract for Parallax's LLM narration stage.
+# Lives in this repo (contracts version with the prompts they protect) and validates
+# against Seismograph's contract DSL. Executed today by scripts/eval_llm.py (key-gated);
+# execution via Seismograph's own runner arrives with its Phase 2 HTTP SUT adapter.
+contract: parallax-brief-narration-groundedness
+subject: brief-narrator
+invariants:
+  # Compared on the app-assigned stat ids each narrative sentence cites — deterministic
+  # canonical identity, never model-invented names (CareerCompiler FAIL-0003 pattern).
+  - field: cited_stat_ids
+    under: [paraphrase, repeat_run]
+    relation: jaccard_at_least
+    threshold: 0.6
+allowed_variation:
+  - field: sentence_wording
+    rule: semantically_equivalent
+run_policy: {samples: 3, configs: 1, confidence: 0.9}
+gate: {max_decision_flip_rate: 0.4}
+probes:
+  - id: brief-planted-drift
+    input: |
+      Workstreams tracked: 3. Attributed commits: 17. Flagged: 1 (drift at or above
+      the alert floor 0.35). checkout: claimed 0.80 done, but its observed activity
+      share is 0.05 - Drift Index 0.75 from 1 commit / 6 churned lines across 4
+      claimed items. search and billing sit below the alert floor.
