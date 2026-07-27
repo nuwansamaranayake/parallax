@@ -8,6 +8,15 @@ calibrated, not just confident; extraction feeds the ledgers without inventing p
 headline number is reproducible by a stranger on public data. The measurement philosophy is the
 product, so the product is measured.
 
+## Published limits
+
+This sentence is what the root page publishes, verbatim. The gate fails if the page and this block drift apart.
+
+<!-- LIMITS -->
+On synthetic project histories with planted drift, the drifting workstream ranks highest in every case (1.0), healthy controls stay at 0.0 below the 0.35 alert floor (1.0), every numeric token in the generated brief traces to a stored statistic (1.0), and the drift index stays within its declared range (1.0); the histories are synthetic, so it does not measure drift detection on a real project.
+<!-- /LIMITS -->
+
+
 ## Phase 1 acceptance thresholds (written before the harness, 2026-07-27)
 
 Phase 1 ships the drift core (git-log + issue-tracker JSON connectors, Claimed and Observed

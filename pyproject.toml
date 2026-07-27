@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "parallax"
-version = "0.3.0"
+version = "0.3.1"
 description = "An AI assistant for project managers: claimed-versus-observed project instrumentation."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -31,6 +31,9 @@ dev = ["pytest", "ruff"]
 
 [tool.setuptools]
 packages = ["app"]
+
+[tool.setuptools.package-data]
+app = ["static/*.html"]
 
 [tool.ruff]
 line-length = 100

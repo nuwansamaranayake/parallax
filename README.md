@@ -1,6 +1,6 @@
 # Parallax
 
-> **Status: Phase 1 core loop released (v0.3.0).** Git-log and issue-tracker
+> **Status: Phase 1 core loop released (v0.3.1).** Git-log and issue-tracker
 > connectors (keyless JSON, plus a local-repo git parser), the Claimed and Observed models,
 > a deterministic per-workstream Drift Index, and a morning brief in which every number
 > traces to a stored stat id. The LLM narration stage is key-gated polish on top. The eval

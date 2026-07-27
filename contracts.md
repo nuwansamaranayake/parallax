@@ -8,6 +8,7 @@ marked as such — no frontend call may reference an endpoint that does not exis
 
 | Frontend call (Phase 2) | Method | Path | Status | Notes |
 |---|---|---|---|---|
+| Front page (browser) | GET | `/` | none | Self-contained HTML: thesis, what it measures, the EVAL.md limits sentence, the endpoint list, build stamp. Public by design. |
 | Liveness / env probe | GET | `/health` | implemented | Returns `{status, env}`. No auth. |
 | Demo drift snapshots | GET | `/api/v1/demo` | implemented | Serves the synthetic `data/synthetic/` dataset. Development-only; returns 503 outside `development`. |
 | Create project + workstreams | POST | `/api/v1/projects` | implemented | Workstream keys unique; path prefixes drive commit attribution. Bearer auth when `SMOKE_TEST_TOKEN` set. |
