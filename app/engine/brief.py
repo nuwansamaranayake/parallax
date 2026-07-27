@@ -17,7 +17,9 @@ from pydantic import BaseModel
 
 from .drift import ALERT_FLOOR, DriftRow
 
-_NUMERIC = re.compile(r"\d+(?:\.\d+)?")
+# Free-standing numbers only: digits embedded in identifiers ("v2-api", "Phase2") are part
+# of a name, not a numeric claim, so they must never be scanned as ungrounded tokens.
+_NUMERIC = re.compile(r"(?<![A-Za-z0-9_-])\d+(?:\.\d+)?(?![A-Za-z0-9_-])")
 # A stat-id marker: bracketed, starts with a letter. Stripped before groundedness scanning
 # so ids themselves are never mistaken for numbers.
 _MARKER = re.compile(r"\[(?=[a-z])[a-z0-9_:.\-]+\]")

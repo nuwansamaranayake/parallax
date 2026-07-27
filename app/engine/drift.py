@@ -111,7 +111,17 @@ def compute_drift(
     (stable order — the eval and the brief both depend on it).
     """
     rollups = compute_rollups(commits, prefixes)
-    declared = {k: v for k, v in rollups.items() if k != UNATTRIBUTED}
+    # Fail loud on undeclared workstream names (matching the API's 422 at import): a
+    # commit or item naming an unknown workstream would otherwise skew max_* silently
+    # (commits) or vanish from the rows (items). UNATTRIBUTED is the one legal extra key.
+    unknown = sorted(
+        {k for k in rollups if k != UNATTRIBUTED and k not in prefixes}
+        | {i.workstream for i in items if i.workstream not in prefixes})
+    if unknown:
+        raise ValueError(
+            f"unknown workstream keys: {unknown} — every commit and claimed item must "
+            "name a declared workstream")
+    declared = {k: v for k, v in rollups.items() if k in prefixes}
     max_commits = max((r.commit_count for r in declared.values()), default=0)
     max_churn = max((r.churn for r in declared.values()), default=0)
 

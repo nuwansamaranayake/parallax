@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from app.engine.brief import build_stats, render_brief, verify_groundedness
+from app.engine.brief import Stat, build_stats, render_brief, verify_groundedness
 from app.engine.drift import ALERT_FLOOR, compute_drift, compute_rollups
 from app.engine.gitlog import (
     UNATTRIBUTED, CommitRecord, attribute, commits_from_entries, parse_git_log,
@@ -140,6 +140,21 @@ def test_unclaimed_workstream_is_excluded_but_rolled_up():
     assert compute_rollups(commits, prefixes)["ghost"].churn == 6
 
 
+def test_compute_drift_fails_loud_on_undeclared_workstream_names():
+    """The API rejects unknown keys at import (422); direct callers (CLI, eval) must get
+    a loud error too, never silent max_* skew or silently dropped items."""
+    prefixes = {"api": ["src/api/"]}
+    ghost_commits = commits_from_entries([
+        {"sha": "abcdef0", "author": "x", "committed_at": "2026-07-01T00:00:00+00:00",
+         "workstream": "ghost", "insertions": 60, "deletions": 30}])
+    with pytest.raises(ValueError, match="ghost"):
+        compute_drift([], ghost_commits, prefixes)
+    ghost_items = items_from_entries([
+        {"item_key": "G-1", "workstream": "ghost", "title": "t", "status": "todo"}])
+    with pytest.raises(ValueError, match="ghost"):
+        compute_drift(ghost_items, [], prefixes)
+
+
 def test_rollups_keep_unattributed_commits_visible():
     case = _case("planted-drift")
     rollups = compute_rollups(commits_from_entries(case["commits"]), case["workstreams"])
@@ -161,6 +176,25 @@ def test_groundedness_check_catches_a_loose_number():
     case = _case("planted-drift")
     md, stats = render_brief(case["project"], _drift_rows(case))
     assert verify_groundedness(md + "\nmystery figure 12345 appeared\n", stats) == ["12345"]
+
+
+def test_numeric_scan_ignores_digits_embedded_in_names():
+    """Digits inside identifiers ('v2-api', 'Phase2') are names, not numeric claims; only
+    free-standing numbers are checked for groundedness."""
+    stats = {"ws:v2-api:commits": Stat(stat_id="ws:v2-api:commits", name="commit count",
+                                       value=3, workstream="v2-api")}
+    assert verify_groundedness(
+        "v2-api logged 3 commits for Phase2 [ws:v2-api:commits]", stats) == []
+    assert verify_groundedness("v2-api logged 4 commits [ws:v2-api:commits]",
+                               stats) == ["4"]
+
+
+def test_digit_bearing_names_render_fully_grounded_brief():
+    case = _case("digit-names")
+    rows = _drift_rows(case)
+    assert rows[0].workstream == case["planted_drifting"]
+    md, stats = render_brief(case["project"], rows)
+    assert verify_groundedness(md, stats) == []
 
 
 def test_brief_renders_identically_twice():
