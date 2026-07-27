@@ -13,5 +13,3 @@ case digit-names: top=v2-api (planted v2-api) drift=0.7542, control ui5=0.0000, 
 | control_quiet | 1.0 | >= 1.0 | PASS |
 | brief_groundedness | 1.0 | >= 1.0 | PASS |
 | index_bounds | 1.0 | >= 1.0 | PASS |
-
-key-gated narration section: NOT RUN (no OPENROUTER_API_KEY); deterministic bounds above are the required gate

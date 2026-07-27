@@ -108,3 +108,16 @@ the *diagnosed* root cause separately (Standard 5).
   and the GoviHub lesson — every silent-failure path found here is the class this repo
   exists to instrument against. An adversarial review of the "finished" tree found what
   the green gate could not; the gate now tests for each of these regressions.
+
+## FAIL-0006 — Eval report embedded an environment-dependent line, breaking byte-reproducibility across environments
+
+- **Date**: 2026-07-23
+- **Surface**: `scripts/eval.py` report writer (central post-fix verification sweep)
+- **Reported symptom**: the committed eval_report.md differed by one trailer line when the
+  gate ran in a shell with a different OPENROUTER_API_KEY state.
+- **Diagnosed cause**: the key-gated-section status note (present/absent by ambient env) was
+  written into the report file, so "byte-reproducible" only held within one environment.
+- **Fix**: the note now goes to stdout only; the report file is purely deterministic. Verified
+  by running the eval with and without a key and comparing byte-for-byte.
+- **Doctrine link**: reproducibility bounds must be environment-independent, or they are
+  theater in every environment except the author's.
