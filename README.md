@@ -1,9 +1,11 @@
 # Parallax
 
-> **Status: scaffold (v0.1).** The engineering harness is built and verified: live smoke test,
-> fail-loud guards, migration checks, CI. The architecture described below is the design being
-> built; Phase 1 is in progress. [ROADMAP.md](ROADMAP.md) shows what exists today versus what
-> is next.
+> **Status: Phase 1 core loop built (v0.1, branch phase-1).** Git-log and issue-tracker
+> connectors (keyless JSON, plus a local-repo git parser), the Claimed and Observed models,
+> a deterministic per-workstream Drift Index, and a morning brief in which every number
+> traces to a stored stat id. The LLM narration stage is key-gated polish on top. The eval
+> suite enforces bounds that were committed before the harness existed.
+> [ROADMAP.md](ROADMAP.md) shows what exists today versus what is next.
 
 **An AI assistant for project managers: claimed-versus-observed project instrumentation.**
 
@@ -39,14 +41,27 @@ send as themselves. Parallax drafts, never sends.
 
 ## What exists today (verified)
 
-This scaffold's doctrine is already enforced, not promised. Three checks you can run in five minutes:
+The doctrine is enforced, not promised. Checks you can run yourself, each observed passing:
 
-1. `python scripts/smoke_test.py` against a running instance: hits real endpoints and asserts
-   non-empty, schema-valid data. Passes.
-2. Set `APP_ENV=production` and call `/api/v1/demo`: returns 503, because fixture data outside
-   development is forbidden by code, not by convention.
-3. `python scripts/eval.py`: raises loudly instead of passing vacuously. An eval that cannot
-   fail is theater; the real harness lands in Phase 1.
+1. `python scripts/eval.py`: the planted-drift suite against bounds written before the
+   harness. Observed: drift detection 1.0 (the workstream claiming 80 percent done with
+   near-zero activity ranks highest in every case), control quiet 1.0, brief groundedness
+   1.0 (every numeric token matches a stored stat), index bounds 1.0. Two consecutive runs
+   produce byte-identical reports.
+2. `python scripts/smoke_test.py` against a running instance: creates a project, imports
+   claimed items and commit records, computes drift, builds the brief, reads both back.
+   The whole loop is keyless. Observed: `SMOKE OK`.
+3. `alembic upgrade head && python scripts/check_migrations.py`: observed
+   `MIGRATION OK: 9 tables` against a real Postgres (8 app tables plus alembic_version).
+4. Set `APP_ENV=production` and call `/api/v1/demo`: returns 503, because fixture data
+   outside development is forbidden by code, not by convention.
+5. `python -m app.cli brief --data data/synthetic/golden/golden.json --case planted-drift`:
+   prints the grounded brief and exits 1 because drift is flagged, so scripts can branch
+   on it. Observed.
+6. Key-gated narration measured for real (`scripts/eval_llm.py`, google/gemini-2.5-flash):
+   citation coverage 1.00, accepted fraction 1.00, repeat-run jaccard 0.90, paraphrase
+   jaccard 0.67, against `contracts/brief-narration.yaml` (validated with Seismograph's
+   own contract loader). Without a key the narrate endpoint refuses with a typed 503.
 
 ## The unique bet
 
@@ -78,14 +93,18 @@ pip install -e ../groundwork
 pip install -e .[dev]
 ```
 
-Then, in another shell:
+Then, with Postgres up (`docker compose up -d db`) and the schema applied
+(`alembic upgrade head && python scripts/check_migrations.py`), in another shell:
 
 ```bash
 export API_PORT=8000 SMOKE_TEST_TOKEN=dev && python scripts/smoke_test.py   # POSIX -> SMOKE OK
 set API_PORT=8000 && set SMOKE_TEST_TOKEN=dev && python scripts/smoke_test.py  # Windows
 ```
 
-The `/api/v1/demo` endpoint serves the synthetic dataset in `data/synthetic/`: no OpenRouter key, Postgres, or Redis is needed to see the app respond. Those are required only for Phase 1 features (real extraction, persistence, migrations).
+The smoke test runs the full keyless business loop: project, imports, drift, brief. No
+OpenRouter key is needed anywhere in the core product; the key unlocks only the narration
+polish endpoint. The CLI needs even less: `python -m app.cli brief` runs the whole loop in
+memory with no server and no database.
 
 ## Demo
 

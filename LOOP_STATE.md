@@ -8,25 +8,29 @@ contract for the LLM narration stage ships in this repo).
 
 ## Milestones (commit each; gate.py after each)
 
-- [ ] M1  EVAL.md numeric thresholds first; LOOP_STATE; branch `phase-1`
-- [ ] M2  engine/gitlog + engine/issues: keyless connectors — structured commit records via
-         JSON, deterministic `git log --numstat` parser for local repo paths, issue-tracker
-         JSON import to typed claimed items (+tests)
-- [ ] M3  engine/drift + engine/brief: activity rollups per workstream, deterministic Drift
+- [x] M1  EVAL.md numeric thresholds first; LOOP_STATE; branch `phase-1`
+- [x] M2  engine/gitlog + engine/issues: keyless connectors — structured commit records via
+         JSON, deterministic `git log --numstat` parser for local repo paths (verified
+         against this repo's own history), issue-tracker JSON import to typed claimed
+         items (+tests)
+- [x] M3  engine/drift + engine/brief: activity rollups per workstream, deterministic Drift
          Index in [0,1] with the formula documented in code, deterministic morning brief where
          every numeric token traces to a stored stat id (+tests)
-- [ ] M4  scripts/eval.py: deterministic keyless harness (synthetic histories with planted
-         drift + healthy control + edge cases) meeting the pre-written EVAL.md bounds;
-         byte-reproducible report
-- [ ] M5  schema + alembic 0002 (projects, workstreams, claimed_items, observed_commits,
-         activity_rollups, drift_indices, briefs, brief_stats) EXPECTED_TABLE_COUNT=9; API
-         (projects, claimed/observed imports, drift compute+read, brief compute+read,
-         key-gated narrate); CLI `python -m app.cli brief`; smoke = real keyless loop;
+- [x] M4  scripts/eval.py: deterministic keyless harness (synthetic histories with planted
+         drift + healthy control + edge cases) meeting the pre-written EVAL.md bounds; all
+         four bounds observed PASS at 1.0; byte-reproducible report
+- [x] M5  schema + alembic 0002 (projects, workstreams, claimed_items, observed_commits,
+         activity_rollups, drift_indices, briefs, brief_stats) EXPECTED_TABLE_COUNT=9
+         (MIGRATION OK: 9 tables observed); API (projects, claimed/observed imports, drift
+         compute+read, brief compute+read, key-gated narrate); CLI `python -m app.cli brief`
+         (exit 1 on flagged drift observed); smoke = real keyless loop (SMOKE OK observed);
          Dockerfile migrate-on-start
-- [ ] M6  flywheel: contracts/brief-narration.yaml validating against Seismograph's DSL
-         (proven via its loader); key-gated narration stage through the gateway; eval_llm
-         observed for real
-- [ ] M7  CI eval -> required; README/contracts.md/CHANGELOG truth pass
+- [x] M6  flywheel: contracts/brief-narration.yaml validating against Seismograph's DSL
+         (plan_id 318d41625ecbccd8 via its loader, cwd Seismograph); key-gated narration
+         through the gateway; eval_llm observed: coverage 1.00, accepted 1.00, repeat
+         jaccard 0.90, paraphrase jaccard 0.67
+- [x] M7  CI eval -> "eval (required)"; README/contracts.md/CHANGELOG truth pass;
+         FAILURES.md FAIL-0004 (stat rendering round-trip) with regression pin
 
 ## DECISION log
 - Zero-key product path: both connectors are JSON/data-entry (commit records, issue records)

@@ -50,3 +50,28 @@ the *diagnosed* root cause separately (Standard 5).
   step the README gives a stranger); Dockerfile installs git before `pip install`.
 - **Doctrine link**: Standard 1 (root cause from the real log, not a retry) and Standard 2 (the
   smoke gate exists to catch exactly this before anyone calls the estate "green").
+
+## FAIL-0004 — Integer stats lost their identity through the database, so narration would
+## have rejected true sentences
+
+- **Date**: 2026-07-27
+- **Surface**: `POST /api/v1/briefs/{id}/narrate` (stat reload in `app/routes.py`), caught
+  during implementation review before the first commit of the route.
+- **Reported symptom** (would have been): the narration gate rejecting perfectly grounded
+  sentences like "Search logged 12 commits." as carrying "ungrounded numbers" — but only
+  for briefs reloaded from the database, never for briefs still in memory, an
+  intermittent-looking failure that is actually deterministic.
+- **Diagnosed cause**: `brief_stats.value` is a Float column. Reloading turns the int stat
+  `12` into `12.0`, and the canonical formatter then renders `"12.00"` while the brief and
+  the model both say `"12"`. Observed repro: `fmt(float(12)) == '12.00'`. String-exact
+  groundedness comparison is the product's spine, so a formatting drift is a correctness
+  bug, not cosmetics.
+- **Root cause**: the schema stored the numeric value but not the numeric *rendering*, and
+  the groundedness contract is defined over renderings.
+- **Fix**: `brief_stats.rendered` stores the exact token that appears in the brief
+  (`fmt(value)` at write time); reload reconstructs the typed value from `rendered`. The
+  stub-gateway API test now echoes an integer stat verbatim and fails if the round-trip
+  ever drifts again.
+- **Doctrine link**: the portfolio thesis (canonicalize before you compare — same lesson as
+  CareerCompiler FAIL-0003, this time for numbers instead of names) and Standard 4's spirit:
+  what the database returns must be asserted, not assumed.

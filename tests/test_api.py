@@ -112,6 +112,9 @@ class _StubGateway:
         assert json_schema is not None, "narration must force a JSON schema"
         return {"sentences": [
             {"text": "Checkout drifts furthest.", "stat_ids": ["ws:checkout:drift"]},
+            # integer stat echoed verbatim: passes only if int formatting survives the
+            # database round-trip (FAILURES.md FAIL-0004 regression pin)
+            {"text": "Search logged 12 commits.", "stat_ids": ["ws:search:commits"]},
             {"text": "Velocity hit 9999 units.", "stat_ids": ["ws:checkout:drift"]},
         ]}
 
@@ -128,10 +131,10 @@ def test_narrate_with_stub_gateway_gates_sentences(client, monkeypatch):
     r = client.post(f"/api/v1/briefs/{bid}/narrate")
     assert r.status_code == 201, r.text
     body = r.json()
-    assert len(body["accepted"]) == 1
-    assert body["accepted"][0]["stat_ids"] == ["ws:checkout:drift"]
+    assert [s["text"] for s in body["accepted"]] == [
+        "Checkout drifts furthest.", "Search logged 12 commits."]
     assert len(body["rejected"]) == 1 and "ungrounded" in body["rejected"][0]["reason"]
-    assert body["narrative"] == "Checkout drifts furthest."
+    assert body["narrative"] == "Checkout drifts furthest. Search logged 12 commits."
 
 
 def test_bearer_auth_enforced_when_token_set(client, monkeypatch):
