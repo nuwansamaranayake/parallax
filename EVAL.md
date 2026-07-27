@@ -50,14 +50,16 @@ reproducible — no private data, no unfalsifiable claims.
 | Tripwire monitors | Lead time vs materialized risk | Fires ahead of the risk becoming visible |
 | Extraction / brief stability | Consistency across reruns (Seismograph-monitored) | Stable claims and brief text under fixed inputs |
 
-## Current status — bounds written, harness next
+## Current status
 
-The Phase 1 acceptance thresholds above were committed before the harness that enforces them
-(this is deliberate: the bar is set before the code can argue with it). `scripts/eval.py`
-still raises `NotImplementedError("eval harness lands in Phase 1")` until milestone M4 wires
-the real suite; this section flips when the harness lands. There are **no measured results
-yet** — any number appearing here before then would be fabricated, and this portfolio does
-not fabricate results.
+The Phase 1 harness is real: `scripts/eval.py` enforces the acceptance table above and exits
+nonzero on any miss. The bounds were committed before the harness existed (bounds-first, per
+doctrine). First published run 2026-07-27: all four bounds PASS at 1.0 (planted drifter
+ranked highest in every case at drift 0.7533 / 0.9000 / 0.8000; controls at 0.0), report
+byte-reproducible across consecutive runs (`eval_report.md`). The key-gated narration
+section (`scripts/eval_llm.py`) writes `eval_report_llm.md` when a key is present and states
+loudly when it did not run. The replay thresholds in the table below remain Phase 2/3
+targets, not achieved results.
 
 ## Acceptance gate
 
