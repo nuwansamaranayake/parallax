@@ -1,9 +1,10 @@
 # API contracts — Parallax
 
 Per Standard 6, every frontend call (the Next.js UI arrives in Phase 2) maps to exactly one backend
-endpoint, and CI diffs this file against the live OpenAPI spec at `/openapi.json` (Swagger UI at
-`/docs`). Implemented endpoints are live today; everything else is planned and marked as such — no
-frontend call may reference an endpoint that does not exist in the spec.
+endpoint. CI's smoke job runs `scripts/check_contracts.py` against the live stack: every row below
+marked `implemented` must exist in the live OpenAPI spec at `/openapi.json` (Swagger UI at `/docs`),
+and the build fails on drift. Implemented endpoints are live today; everything else is planned and
+marked as such — no frontend call may reference an endpoint that does not exist in the spec.
 
 | Frontend call (Phase 2) | Method | Path | Status | Notes |
 |---|---|---|---|---|

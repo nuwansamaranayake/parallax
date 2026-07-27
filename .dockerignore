@@ -1,0 +1,14 @@
+# Keep secrets, VCS state, and local tooling out of the image. `COPY . .` copies the
+# whole build context; without this file the gitignored .env (live keys) and .git history
+# would be baked into every image built from the documented compose flow.
+.git
+.env
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.planning
+.claude
+LOOP_STATE.md
+data/local
