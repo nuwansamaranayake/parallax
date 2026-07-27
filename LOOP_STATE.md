@@ -50,4 +50,11 @@ contract for the LLM narration stage ships in this repo).
 (none)
 
 ## Next task
-M1 commit, then M2 (engine connectors with tests).
+NONE — Phase 1 GATES_PASSED (2026-07-27). All DONE-WHEN items observed: gate.py exit 0
+(ruff, 24 pytest, live keyless business-loop smoke, eval all bounds 1.0), MIGRATION OK: 9
+tables against the throwaway Postgres, prod-guard (APP_ENV=production: /api/v1/demo 503 and
+GET /api/v1/projects/1/drift 200 with 3 rows), eval report byte-reproducible (two runs,
+cmp identical), flywheel contract validated via Seismograph's loader (plan_id
+318d41625ecbccd8) + key-gated LLM eval observed (coverage 1.00, accepted 1.00, repeat
+jaccard 0.90, paraphrase jaccard 0.67 on google/gemini-2.5-flash). Branch `phase-1`,
+NOT pushed.
