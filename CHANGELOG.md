@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-23
+
 ### Added — Phase 1 drift core
 - Keyless connectors: issue-tracker JSON import (typed claimed items) and commit-record
   JSON import, plus a deterministic `git log --numstat` parser for local repo paths
